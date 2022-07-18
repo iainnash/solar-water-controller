@@ -1,23 +1,6 @@
-#include "StateMachine.h"
-#include <stdio.h>
-
-void HAL::set_alarm_silence_button(bool state)
-{
-  alarm_silence_button = state;
-}
-
-void HAL::set_alarm_state(bool state)
-{
-  alarm = state;
-}
-bool HAL::is_alarm_silence_pushed()
-{
-  return alarm_silence_button;
-}
-
-void HAL::set_alarm_condition(bool state) {
-  alarm_condition = state;
-}
+#include "AlarmMachine.h"
+#include "HAL.h"
+#include "constants.h"
 
 enum Trigger
 {
@@ -26,22 +9,20 @@ enum Trigger
   ALARM_RESOLVED
 };
 
-HAL hal;
-
 // Alarm
 void no_alarm_on_enter()
 {
-  hal.set_alarm_state(false);
+  getHal()->set_alarm_state(false);
 }
 
 void alarm_on_enter()
 {
-  hal.set_alarm_state(true);
+  getHal()->set_alarm_state(true);
 }
 
 void alarm_silenced()
 {
-  hal.set_alarm_state(false);
+  getHal()->set_alarm_state(false);
 }
 
 AlarmFSM::AlarmFSM()
@@ -63,7 +44,7 @@ void AlarmFSM::setup()
 
 void AlarmFSM::run()
 {
-  if (hal.alarm_condition)
+  if (getHal()->get_temps().solar_temp_f > SOLAR_MAX_TEMP)
   {
     fsm->trigger(ALARM_CONDITION);
   }
@@ -71,7 +52,8 @@ void AlarmFSM::run()
   {
     fsm->trigger(ALARM_RESOLVED);
   }
-  if (hal.alarm_silence_button == true)
+
+  if (getHal()->alarm_silence_button == true)
   {
     fsm->trigger(ALARM_SILENCE);
   }
@@ -79,13 +61,7 @@ void AlarmFSM::run()
 }
 
 AlarmFSM alarm_fsm;
-
-HAL* getHal()
-{
-  return &hal;
-}
-
-AlarmFSM* getAlarmFsm()
+AlarmFSM *getAlarmFsm()
 {
   return &alarm_fsm;
 }

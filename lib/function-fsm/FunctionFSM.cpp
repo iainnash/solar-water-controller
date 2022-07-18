@@ -45,6 +45,7 @@ void FunctionFsm::add_transition(FunctionState *state_from,
                                                          state_to,
                                                          event,
                                                          on_transition);
+                                                         
   // Replaced pointers and realloc with std::vector
   m_transitions.push_back(transition);
 }
