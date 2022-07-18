@@ -12,36 +12,52 @@ void setup()
   pinMode(ALARM_SILENCE_BUTTON_PIN, INPUT);
   pinMode(PUMP_PIN, OUTPUT);
   pinMode(HEATER_PIN, OUTPUT);
+
+  // TODO(iain): Setup RTC
 }
 
 unsigned long last_millis;
 
-void update_temperature_readings() {
+void update_temperature_readings()
+{
   // TODO(iain): Read real temperature here
   getHal()->set_temps(100, 100, 100);
 }
 
+void update_display() {
+  const char* current_alarm_state = getAlarmFsm()->fsm->m_current_state.name;
+  const char* current_heater_state = getHeaterFSM()->fsm->m_current_state.name;
+  Temps tempatures = getHal()->temps;
+}
+
 void loop()
 {
+  unsigned long curMillis = millis();
+
   // every 30 seconds
-  if (millis() - last_millis > MAIN_HEATER_LOOP_SECONDS * 1000)
+  if (curMillis - last_millis > MAIN_HEATER_LOOP_SECONDS * 1000)
   {
     update_temperature_readings();
     // 1 update HAL with machine state
     getHal()->set_heater(digitalRead(HEATER_PIN));
-    getHeaterFSM()->run();
-    // 2 flush HAL with new state
+    getHal()->set_pump(digitalRead(PUMP_PIN));
+    getHal()->set_seconds(curMillis / 1000);
 
+    getHeaterFSM()->run();
+
+    // 2 flush HAL with new state
     digitalWrite(HEATER_PIN, getHal()->get_heater());
     digitalWrite(PUMP_PIN, getHal()->get_pump());
 
-    last_millis = millis();
+    update_display();
+    last_millis = curMillis;
   }
 
-  if (millis() - last_millis > ALARM_LOOP_SECONDS * 1000)
+  if (curMillis - last_millis > ALARM_LOOP_SECONDS * 1000)
   {
     getHal()->set_alarm_silence_button(digitalRead(ALARM_SILENCE_BUTTON_PIN));
     getHal()->set_alarm_state(digitalRead(ALARM_PIN));
+    getHal()->set_seconds(curMillis / 1000);
     getAlarmFsm()->run();
     digitalWrite(ALARM_PIN, getHal()->get_alarm_state());
   }
