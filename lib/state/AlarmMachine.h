@@ -1,4 +1,4 @@
-#include <FunctionFSM.h>
+#include <Fsm.h>
 
 class AlarmFSM
 {
@@ -6,10 +6,10 @@ public:
   AlarmFSM();
   void setup();
   void run();
-  FunctionFsm *fsm;
-  FunctionState *state_no_alarm;
-  FunctionState *state_alarm;
-  FunctionState *state_silenced;
+  Fsm *fsm;
+  State *state_no_alarm;
+  State *state_alarm;
+  State *state_silenced;
 };
 
 AlarmFSM* getAlarmFsm();

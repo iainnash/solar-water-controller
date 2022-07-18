@@ -32,10 +32,10 @@ AlarmFSM::AlarmFSM()
 
 void AlarmFSM::setup()
 {
-  state_no_alarm = new FunctionState("no alarm", &no_alarm_on_enter, nullptr, nullptr);
-  state_alarm = new FunctionState("alarm", &alarm_on_enter, nullptr, nullptr);
-  state_silenced = new FunctionState("silenced", &alarm_silenced, nullptr, nullptr);
-  fsm = new FunctionFsm(state_no_alarm);
+  state_no_alarm = new State("no alarm", &no_alarm_on_enter, nullptr, nullptr);
+  state_alarm = new State("alarm", &alarm_on_enter, nullptr, nullptr);
+  state_silenced = new State("silenced", &alarm_silenced, nullptr, nullptr);
+  fsm = new Fsm(state_no_alarm);
   fsm->add_transition(state_no_alarm, state_alarm, ALARM_CONDITION, nullptr);
   fsm->add_transition(state_alarm, state_silenced, ALARM_SILENCE, nullptr);
   fsm->add_transition(state_silenced, state_no_alarm, ALARM_RESOLVED, nullptr);

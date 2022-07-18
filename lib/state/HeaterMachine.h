@@ -1,4 +1,4 @@
-#include <FunctionFSM.h>
+#include <Fsm.h>
 
 #pragma once
 
@@ -8,19 +8,19 @@ public:
   HeaterFSM();
   void setup();
   void run();
-  FunctionFsm *fsm;
-  FunctionState *state_idle;
-  FunctionState *state_sensing;
-  FunctionState *state_running;
-  FunctionState *state_sanitizing;
+  Fsm *fsm;
+  State *state_idle;
+  State *state_sensing;
+  State *state_running;
+  State *state_sanitizing;
   unsigned long last_sanitize_seconds = 0;
 
-private:
-  int sense_count = 0;
   void state_idle_run();
   void state_sensing_run();
   void state_sanitize_run();
   void state_running_run();
+private:
+  int sense_count = 0;
 };
 
 HeaterFSM* getHeaterFSM();

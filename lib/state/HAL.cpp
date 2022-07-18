@@ -18,6 +18,10 @@ bool HAL::is_alarm_silence_pushed()
   return alarm_silence_button;
 }
 
+bool HAL::get_alarm_state() {
+  return alarm;
+}
+
 void HAL::set_heater(bool state)
 {
   heater = state;

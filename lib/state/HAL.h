@@ -13,6 +13,7 @@ public:
   void set_alarm_silence_button(bool state);
 
   void set_alarm_state(bool state);
+  bool get_alarm_state();
 
   bool get_heater();
   void set_heater(bool state);
