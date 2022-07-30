@@ -44,6 +44,8 @@ public:
                             unsigned long interval, void (*on_transition)());
   
   bool is_in_state(State* compare_state);
+  
+  State* current_state();
 
   void check_timed_transitions();
 

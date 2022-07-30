@@ -2,9 +2,12 @@
 
 struct Temps {
   // Temps(int a, int b, int c);
-  int tank_temp_f;
-  int solar_temp_f;
-  int water_shower_out_f;
+  float tank_temp_f;
+  float solar_temp_f;
+  float water_shower_out_f;
+
+  // New sensor
+  float tank_in_temp_f;
 };
 
 class HAL
@@ -30,7 +33,7 @@ public:
   unsigned long get_seconds();
   void set_seconds(unsigned long seconds);
   Temps get_temps();
-  void set_temps(int tank_temp_f, int solar_temp_f, int water_shower_out_f);
+  void set_temps(int tank_temp_f, int solar_temp_f, int water_shower_out_f, int tank_in_temp_f);
 
   // testing only
 

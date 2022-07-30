@@ -1,4 +1,6 @@
-#include <Fsm.h>
+#include "Fsm.h"
+
+#define SOLAR_MAX_TEMP 190
 
 class AlarmFSM
 {
