@@ -1,6 +1,5 @@
 #include "AlarmMachine.h"
 #include "HAL.h"
-#include "constants.h"
 
 enum Trigger
 {

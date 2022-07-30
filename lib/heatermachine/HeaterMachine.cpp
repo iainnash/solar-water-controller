@@ -22,7 +22,7 @@ HeaterFSM::HeaterFSM()
 bool is_day()
 {
   unsigned int hour_of_day = getHal()->get_hour_of_day();
-  return hour_of_day > HOUR_DAY_START && hour_of_day < HOUR_DAY_START;
+  return hour_of_day >= HOUR_DAY_START && hour_of_day < HOUR_DAY_START;
 }
 
 void HeaterFSM::state_sensing_run()

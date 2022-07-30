@@ -43,10 +43,12 @@ Temps HAL::get_temps()
   return temps;
 }
 
-void HAL::set_temps(int tank_temp_f, int solar_temp_f, int water_shower_out_f) {
+void HAL::set_temps(int tank_temp_f, int solar_temp_f, int water_shower_out_f, int tank_in_temp_f) {
   temps.tank_temp_f = tank_temp_f;
   temps.solar_temp_f = solar_temp_f;
   temps.water_shower_out_f = water_shower_out_f;
+  
+  temps.tank_in_temp_f = tank_in_temp_f;
 }
 
 unsigned int HAL::get_hour_of_day()

@@ -32,6 +32,10 @@ Fsm::Fsm(State *initial_state)
 {
 }
 
+State* Fsm::current_state() {
+	return m_current_state;
+}
+
 Fsm::~Fsm()
 {
   free(m_transitions);
