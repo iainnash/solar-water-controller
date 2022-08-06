@@ -277,6 +277,16 @@ void update_display()
   lcd.print("Tank in solar: ");
   lcd.print(int(temps.tank_in_temp_f));
 
+  // TODO(iain): Save sanitize in EEPROM against RTC?
+  if (getHeaterFSM()->last_sanitize_seconds == 0) {
+    lcd.print("not sanitized yet")
+  } else {
+    int last_sanitized_seconds_now = getHal()->get_seconds() - getHeaterFSM()->last_sanitize_seconds;
+    lcd.print("last sanitize: ")
+    lcd.print(int(last_sanitized_seconds_now/60/60));
+    lcd.print(" hrs")
+  }
+
   lcd.setCursor(0, 5);
   lcd.print("heater: ");
   lcd.print(storedHeaterTimes.sanitizeTimes / 60);

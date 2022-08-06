@@ -157,6 +157,10 @@ void HeaterFSM::setup()
 void HeaterFSM::run()
 {
   fsm->run_machine();
+  if (getHal()->get_temps().tank_temp_f >= STERI_CYCLE_END_TEMP) {
+    // Update last sanitize seconds
+    last_sanitize_seconds = getHal()->get_seconds();
+  }
 }
 
 HeaterFSM heaterFSM;
