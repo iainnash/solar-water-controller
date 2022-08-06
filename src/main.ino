@@ -69,9 +69,9 @@ void setupEEPROM(bool runReset)
   if (runReset)
   {
     // set to zero
-    memset((uint8_t)&storedHeaterTimes, sizeof(storedHeaterTimes));
+    memset((uint8_t *)&storedHeaterTimes, 0, sizeof(storedHeaterTimes));
     // write
-    eeprom50.writeBlock(EEPROM_HEATER_ADDR, (uint8_t)&storedHeaterTimes, sizeof(storedHeaterTimes));
+    eeprom50.writeBlock(EEPROM_HEATER_ADDR, (uint8_t *)&storedHeaterTimes, sizeof(storedHeaterTimes));
   }
   eeprom50.readBlock(EEPROM_HEATER_ADDR, (uint8_t *)&storedHeaterTimes, sizeof(storedHeaterTimes));
 }
@@ -119,14 +119,14 @@ void setup()
   sensorsRemote.begin();
 
   lcd.setCursor(0, 0);
-  lcd.print("PRESS ENTER TO RESET SYSTEM")
-      delay(500);
+  lcd.print("PRESS ENTER TO RESET SYSTEM");
+  delay(500);
   bool runReset = false;
   if (digitalRead(BUTTON_UP_PIN) == LOW)
   {
     runReset = true;
     lcd.setCursor(0, 2);
-    lcd.print("...RESETTING...")
+    lcd.print("...RESETTING...");
   }
   delay(500);
   clear_lcd();
@@ -271,8 +271,8 @@ void update_display()
   lcd.print("Solar: ");
   lcd.print(int(temps.solar_temp_f));
   lcd.print(" ");
-  lcd.print("Tank in solar: ")
-      lcd.print(int(temps.tank_in_temp_f));
+  lcd.print("Tank in solar: ");
+  lcd.print(int(temps.tank_in_temp_f));
 
   lcd.setCursor(0, 5);
   lcd.print("heater: ");
