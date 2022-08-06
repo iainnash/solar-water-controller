@@ -22,7 +22,7 @@ HeaterFSM::HeaterFSM()
 bool is_day()
 {
   unsigned int hour_of_day = getHal()->get_hour_of_day();
-  return hour_of_day >= HOUR_DAY_START && hour_of_day < HOUR_DAY_START;
+  return hour_of_day >= HOUR_DAY_START && hour_of_day < HOUR_DAY_END;
 }
 
 void HeaterFSM::state_sensing_run()
@@ -90,6 +90,7 @@ void HeaterFSM::state_idle_run()
 
 void HeaterFSM::state_running_run()
 {
+  getHal()->set_heater(false);
   if (is_day())
   {
     Temps temps = getHal()->get_temps();
@@ -144,6 +145,7 @@ void HeaterFSM::setup()
       nullptr);
   // start in night mode
   fsm = new Fsm(state_idle);
+  fsm->add_transition(state_idle, state_running, DAY_TIME_STARTED_RUN, nullptr);
   fsm->add_transition(state_idle, state_sensing, START_SENSE, nullptr);
   fsm->add_transition(state_idle, state_sanitizing, START_SANITIZE, nullptr);
   fsm->add_transition(state_running, state_sanitizing, START_SANITIZE, nullptr);

@@ -36,9 +36,10 @@ struct StoredHeaterTimes
   unsigned long sanitizeTimes;
   unsigned long nightHeatTimes;
 };
+
 StoredHeaterTimes storedHeaterTimes;
 
-void setupRTC()
+void setupRTC(bool runReset)
 {
   while (!MCP7940.begin())
   {                                                                         // Initialize RTC communications
@@ -57,10 +58,22 @@ void setupRTC()
     }                                                                  // of if-then oscillator didn't start
   }                                                                    // of while the oscillator is off
 
-  if (!MCP7940.getPowerFail())
+  if (runReset)
   {
     MCP7940.adjust(); // Set to library compile Date/Time
   }
+}
+
+void setupEEPROM(bool runReset)
+{
+  if (runReset)
+  {
+    // set to zero
+    memset((uint8_t)&storedHeaterTimes, sizeof(storedHeaterTimes));
+    // write
+    eeprom50.writeBlock(EEPROM_HEATER_ADDR, (uint8_t)&storedHeaterTimes, sizeof(storedHeaterTimes));
+  }
+  eeprom50.readBlock(EEPROM_HEATER_ADDR, (uint8_t *)&storedHeaterTimes, sizeof(storedHeaterTimes));
 }
 
 void setupLibrary()
@@ -105,11 +118,23 @@ void setup()
   sensorsLocal.begin();
   sensorsRemote.begin();
 
-  setupRTC();
+  lcd.setCursor(0, 0);
+  lcd.print("PRESS ENTER TO RESET SYSTEM")
+      delay(500);
+  bool runReset = false;
+  if (digitalRead(BUTTON_UP_PIN) == LOW)
+  {
+    runReset = true;
+    lcd.setCursor(0, 2);
+    lcd.print("...RESETTING...")
+  }
+  delay(500);
+  clear_lcd();
+
+  setupRTC(runReset);
+  setupEEPROM(runReset);
 
   setupLibrary();
-
-  eeprom50.readBlock(EEPROM_HEATER_ADDR, (uint8_t *)&storedHeaterTimes, sizeof(storedHeaterTimes));
 }
 
 void update_temperature_readings()
@@ -120,12 +145,13 @@ void update_temperature_readings()
 
   getHal()->set_hour_of_day(MCP7940.now().hour());
 
-  float tempF1 = sensorsLocal.getTempFByIndex(0);
-  float tempF2 = sensorsLocal.getTempFByIndex(1);
-  float tempF3 = sensorsLocal.getTempFByIndex(2);
+  float tank_temp_f = sensorsLocal.getTempFByIndex(TANK_TEMP_SENSOR_INDEX);
+  float water_shower_out_f = sensorsLocal.getTempFByIndex(WATER_SHOWER_SENSOR_INDEX);
+  float tank_in_temp_f = sensorsLocal.getTempFByIndex(TANK_IN_TEMP_INDEX);
 
-  float tempFRemote = sensorsRemote.getTempFByIndex(0);
-  getHal()->set_temps(tempF1, tempF2, tempFRemote, tempF3);
+  float solar_temp_f = sensorsRemote.getTempFByIndex(0);
+
+  getHal()->set_temps(tank_temp_f, water_shower_out_f, tank_in_temp_f, solar_temp_f);
 }
 
 void store_eeprom_values()
@@ -136,10 +162,10 @@ void store_eeprom_values()
 // buffer for displaying info on display
 char inputBuffer[256];
 
-
 unsigned long last_millis_loop = 0;
 unsigned long last_millis_alarm = 0;
 unsigned long last_update_heaters_millis = 0;
+unsigned long last_flush_eeprom_millis = 0;
 
 bool run_program()
 {
@@ -190,8 +216,16 @@ bool run_program()
       }
     }
 
-    last_update_heaters_millis = 0;
+    last_update_heaters_millis = millis();
   }
+
+  // flush eeprom every 5 mins
+  if (curMillis - last_flush_eeprom_millis > 5 * 60 * 1000)
+  {
+    store_eeprom_values();
+    last_flush_eeprom_millis = millis();
+  }
+
   return false;
 }
 
@@ -231,13 +265,14 @@ void update_display()
   lcd.print("Tank: ");
   lcd.print(int(temps.tank_temp_f));
   lcd.print("  ");
-  lcd.print("Out: ");
+  lcd.print("Shower out: ");
   lcd.print(int(temps.water_shower_out_f));
   lcd.setCursor(0, 4);
   lcd.print("Solar: ");
   lcd.print(int(temps.solar_temp_f));
   lcd.print(" ");
-  lcd.print(cancelPushed ? "Silence" : "!! ALARM");
+  lcd.print("Tank in solar: ")
+      lcd.print(int(temps.tank_in_temp_f));
 
   lcd.setCursor(0, 5);
   lcd.print("heater: ");
