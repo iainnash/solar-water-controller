@@ -119,16 +119,19 @@ void setup()
   sensorsRemote.begin();
 
   lcd.setCursor(0, 0);
-  lcd.print("PRESS ENTER TO RESET SYSTEM");
-  delay(500);
+  lcd.print("PRESS ENTER TO RESET SYSTEM (in 1 sec)");
+  delay(1000);
   bool runReset = false;
-  if (digitalRead(BUTTON_UP_PIN) == LOW)
+  if (digitalRead(BUTTON_ENTER_PIN) == LOW)
   {
     runReset = true;
     lcd.setCursor(0, 2);
     lcd.print("...RESETTING...");
+  } else {
+    lcd.setCursor(0, 2);
+    lcd.print("...STARTING UP...");
   }
-  delay(500);
+  delay(2000);
   clear_lcd();
 
   setupRTC(runReset);
