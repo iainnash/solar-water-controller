@@ -42,7 +42,7 @@ void HeaterFSM::state_sensing_run()
 void HeaterFSM::state_sanitize_run()
 {
   // if less than 20 hours since last sanitize don't run cycle
-  if (last_sanitize_seconds < 20L * 60L * 60L)
+  if (getHal()->get_seconds() - last_sanitize_seconds < (21L * 60L * 60L))
   {
     fsm->trigger(SANITIZE_SKIPPED);
     return;

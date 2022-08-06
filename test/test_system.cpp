@@ -86,11 +86,45 @@ void test_day_night_transition_sanitize_run(void)
     TEST_ASSERT_MESSAGE(getHeaterFSM()->fsm->is_in_state(getHeaterFSM()->state_sanitizing), "State is not sanitize");
 
     getHeaterFSM()->run();
+    getHal()->set_temps(200, 200, 200, 200);
+    getHeaterFSM()->run();
+
+    TEST_MESSAGE(getHeaterFSM()->fsm->current_state()->name);
     TEST_ASSERT_MESSAGE(getHeaterFSM()->fsm->is_in_state(getHeaterFSM()->state_idle), "state is not idle");
 
     // sanitize is recent so should not be updated
     TEST_ASSERT_EQUAL_MESSAGE(getHeaterFSM()->last_sanitize_seconds, 10000, "Sanitize not 10000");
+
+    // daytime
+    getHal()->set_hour_of_day(15);
+
+    // run FSM (day state)
+    getHeaterFSM()->run();
+    getHeaterFSM()->run();
+
+    // daytime state
+    TEST_ASSERT_MESSAGE(getHeaterFSM()->fsm->is_in_state(getHeaterFSM()->state_running), "State is not running");
+
+    // some time has passed
+    getHal()->set_seconds(20000000);
+    getHal()->set_temps(80, 80, 80, 80);
+    getHal()->set_hour_of_day(20);
+    getHeaterFSM()->run();
+
+    // should sanitize
+    TEST_ASSERT_MESSAGE(getHeaterFSM()->fsm->is_in_state(getHeaterFSM()->state_sanitizing), "State is not sanitizing");
+    getHeaterFSM()->run();
+
+    TEST_ASSERT_EQUAL_MESSAGE(getHal()->get_heater(), true, "heater is not on");
+
+    getHal()->set_temps(200, 200, 200, 200);
+
+    getHeaterFSM()->run();
+    getHeaterFSM()->run();
+
+    TEST_ASSERT_EQUAL_MESSAGE(getHeaterFSM()->last_sanitize_seconds, 20000000, "sanitize seconds wrong");
     
+    TEST_ASSERT_MESSAGE(getHeaterFSM()->fsm->is_in_state(getHeaterFSM()->state_idle), "State is not normal night idle");
 }
 
 void test_alarm_setup(void)
