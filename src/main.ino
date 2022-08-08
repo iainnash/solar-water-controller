@@ -61,6 +61,9 @@ void setupRTC(bool runReset)
   if (runReset)
   {
     MCP7940.adjust(); // Set to library compile Date/Time
+    // DateTime       now = MCP7940.now();
+    // MCP7940.adjust(
+    //             DateTime(now.year(), now.month(), now.day(), now.hour() - 3, now.minute(), now.second()));
   }
 }
 
@@ -238,15 +241,21 @@ void update_display()
   const char *current_heater_state = getHeaterFSM()->fsm->current_state()->name;
   Temps temps = getHal()->temps;
 
-  lcd.setCursor(0, 0);
+  int line = 0;
+
+  lcd.setCursor(0, line);
   lcd.print("Status: ");
   lcd.print(current_heater_state);
   lcd.print(' ');
+  line += 1;
+  lcd.setCursor(0, line);
+  lcd.print("Alarm: ");
   lcd.print(current_alarm_state);
-  lcd.print("      ");
+  lcd.print("  ");
 
   // Write the counter on the second line...
-  lcd.setCursor(0, 1);
+  line += 1;
+  lcd.setCursor(0, line);
   lcd.write(' ');
   lcd.write(0); // write the smiley
 
@@ -261,33 +270,40 @@ void update_display()
 
   // pull up, GND is activated (on = 0, off = 1)
   bool cancelPushed = !digitalRead(ALARM_SILENCE_BUTTON_PIN);
-  lcd.setCursor(0, 2);
+  line += 1;
+  lcd.setCursor(0, line);
   lcd.print(cancelPushed ? "Cancel pushed" : "Normal");
 
-  lcd.setCursor(0, 3);
+  line += 1;
+  lcd.setCursor(0, line);
   lcd.print("Tank: ");
   lcd.print(int(temps.tank_temp_f));
   lcd.print("  ");
-  lcd.print("Shower out: ");
-  lcd.print(int(temps.water_shower_out_f));
-  lcd.setCursor(0, 4);
   lcd.print("Solar: ");
   lcd.print(int(temps.solar_temp_f));
+  line += 1;
+  lcd.setCursor(0, line);
+  lcd.print("Shower: ");
+  lcd.print(int(temps.water_shower_out_f));
   lcd.print(" ");
-  lcd.print("Tank in solar: ");
+  lcd.print("In: ");
   lcd.print(int(temps.tank_in_temp_f));
+
+  line += 1;
+  lcd.setCursor(0, line);
 
   // TODO(iain): Save sanitize in EEPROM against RTC?
   if (getHeaterFSM()->last_sanitize_seconds == 0) {
-    lcd.print("not sanitized yet")
+    lcd.print("not sanitized yet");
   } else {
     int last_sanitized_seconds_now = getHal()->get_seconds() - getHeaterFSM()->last_sanitize_seconds;
-    lcd.print("last sanitize: ")
+    lcd.print("last sanitize: ");
     lcd.print(int(last_sanitized_seconds_now/60/60));
-    lcd.print(" hrs")
+    lcd.print(" hrs");
   }
 
-  lcd.setCursor(0, 5);
+  line += 1;
+  lcd.setCursor(0, line);
   lcd.print("heater: ");
   lcd.print(storedHeaterTimes.sanitizeTimes / 60);
   lcd.print(" / ");
