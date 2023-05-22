@@ -13,6 +13,7 @@ struct Temps {
 class HAL
 {
 public:
+  HAL();
   void set_alarm_silence_button(bool state);
 
   void set_alarm_state(bool state);
@@ -33,7 +34,7 @@ public:
   unsigned long get_seconds();
   void set_seconds(unsigned long seconds);
   Temps get_temps();
-  void set_temps(int tank_temp_f, int solar_temp_f, int water_shower_out_f, int tank_in_temp_f);
+  void set_temps(float tank_temp_f, float solar_temp_f, float water_shower_out_f, float tank_in_temp_f);
 
   // testing only
 

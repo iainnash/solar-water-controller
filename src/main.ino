@@ -56,14 +56,19 @@ void setupRTC(bool runReset)
       SerialUSB.println(F("Oscillator did not start, trying again.")); // Show error and
       delay(1000);                                                     // wait for a second
     }                                                                  // of if-then oscillator didn't start
-  }                                                                    // of while the oscillator is off
+  }       
+  MCP7940.setBattery(true);     // enable battery backup mode
+  if (!MCP7940.getBattery()) {  // Check if successful
+    Serial.println(F("Couldn't set Battery Backup, is this a MCP7940N?"));
+  }                          // if-then battery mode couldn't be set                                                             // of while the oscillator is off
 
   if (runReset)
   {
-    MCP7940.adjust(); // Set to library compile Date/Time
-    // DateTime       now = MCP7940.now();
-    // MCP7940.adjust(
-    //             DateTime(now.year(), now.month(), now.day(), now.hour() - 3, now.minute(), now.second()));
+    //MCP7940.adjust(); // Set to library compile Date/Time
+    DateTime       now = MCP7940.now();
+     MCP7940.adjust(
+      // now.hour - 3 is to adjust EST to PDT when out on the playa.
+                 DateTime(now.year(), now.month(), now.day(), now.hour() - 3, now.minute(), now.second()));
   }
 }
 
@@ -104,9 +109,7 @@ void clear_lcd()
 
 void setup()
 {
-  // PCD8544-compatible displays may have a different resolution...
   lcd.begin();
-  // Add the smiley to position "0" of the ASCII table...
   lcd.createChar(0, glyph);
   clear_lcd();
 
@@ -239,19 +242,15 @@ void update_display()
 {
   const char *current_alarm_state = getAlarmFsm()->fsm->current_state()->name;
   const char *current_heater_state = getHeaterFSM()->fsm->current_state()->name;
-  Temps temps = getHal()->temps;
+  Temps temps = getHal()->get_temps();
 
   int line = 0;
 
   lcd.setCursor(0, line);
-  lcd.print("Status: ");
+  lcd.print("ST: ");
   lcd.print(current_heater_state);
-  lcd.print(' ');
-  line += 1;
-  lcd.setCursor(0, line);
-  lcd.print("Alarm: ");
+  lcd.print(" / ");
   lcd.print(current_alarm_state);
-  lcd.print("  ");
 
   // Write the counter on the second line...
   line += 1;
@@ -264,30 +263,34 @@ void update_display()
   sprintf(inputBuffer, "%02d:%02d", now.hour(), now.minute());
   lcd.print(inputBuffer);
 
-  SerialUSB.print("Requesting temperatures...");
+  // SerialUSB.print("Requesting temperatures...");
 
-  SerialUSB.println("DONE");
+  // SerialUSB.println("DONE");
 
   // pull up, GND is activated (on = 0, off = 1)
   bool cancelPushed = !digitalRead(ALARM_SILENCE_BUTTON_PIN);
   line += 1;
   lcd.setCursor(0, line);
-  lcd.print(cancelPushed ? "Cancel pushed" : "Normal");
+  lcd.print(cancelPushed ? "CANC " : "");
+  lcd.print(getHal()->get_heater() ? "heating" : "NH");
+  lcd.print(getHal()->get_pump() ? " pump" : " NP");
 
   line += 1;
   lcd.setCursor(0, line);
   lcd.print("Tank: ");
-  lcd.print(int(temps.tank_temp_f));
-  lcd.print("  ");
-  lcd.print("Solar: ");
-  lcd.print(int(temps.solar_temp_f));
+  lcd.print(temps.tank_temp_f);
   line += 1;
   lcd.setCursor(0, line);
-  lcd.print("Shower: ");
-  lcd.print(int(temps.water_shower_out_f));
+  lcd.print("  ");
+  lcd.print("Solar: ");
+  lcd.print(temps.solar_temp_f);
+  line += 1;
+  lcd.setCursor(0, line);
+  lcd.print("SHR: ");
+  lcd.print(temps.water_shower_out_f);
   lcd.print(" ");
-  lcd.print("In: ");
-  lcd.print(int(temps.tank_in_temp_f));
+  lcd.print("IN: ");
+  lcd.print(temps.tank_in_temp_f);
 
   line += 1;
   lcd.setCursor(0, line);

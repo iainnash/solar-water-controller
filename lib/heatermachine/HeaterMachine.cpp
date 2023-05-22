@@ -29,12 +29,13 @@ void HeaterFSM::state_sensing_run()
 {
   // 1. turn on pump
   getHal()->set_pump(true);
-  if (!sense_count)
+  if (sense_count < 2)
   {
     sense_count += 1;
   }
-  if (sense_count > 2)
+  else
   {
+    sense_count = 0;
     fsm->trigger(SENSE_FINISHED);
   }
 }
@@ -133,13 +134,13 @@ void state_sanitize_run_entrypoint() {
 void HeaterFSM::setup()
 {
   state_idle = new State(
-      "idle", nullptr, &state_idle_run_entrypoint,
+      "night-n", nullptr, &state_idle_run_entrypoint,
       nullptr);
   state_sensing = new State(
       "sensing", nullptr, &state_sensing_run_entrypoint,
       nullptr);
   state_running = new State(
-      "running", nullptr, &state_running_run_entrypoint,
+      "day-n", nullptr, &state_running_run_entrypoint,
       nullptr);
   state_sanitizing = new State(
       "sanitizing", nullptr, &state_sanitize_run_entrypoint,
@@ -151,6 +152,7 @@ void HeaterFSM::setup()
   fsm->add_transition(state_idle, state_sanitizing, START_SANITIZE, nullptr);
   fsm->add_transition(state_running, state_sanitizing, START_SANITIZE, nullptr);
   fsm->add_transition(state_sanitizing, state_idle, SANITIZE_FINISHED, nullptr);
+  fsm->add_transition(state_sensing, state_running, SENSE_FINISHED, nullptr);
   fsm->add_transition(state_running, state_sanitizing, DAY_TO_NIGHT_TRANSITION, nullptr);
   fsm->add_transition(state_running, state_sensing, STEAM_HOTTER_TANK, nullptr);
   fsm->add_transition(state_sanitizing, state_idle, SANITIZE_SKIPPED, nullptr);
