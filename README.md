@@ -2,6 +2,8 @@
 
 This is a solar water controller deployed at Burning Man 2022 to manage a water heater and pump system for the Kostume Kult theme camp.
 
+![Controller Installation Setup Preview Image](docs/install-setup-controller.jpeg)
+
 ### Code Architecture
 
 The controller code is divided into two halves:
